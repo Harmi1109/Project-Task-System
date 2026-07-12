@@ -1,0 +1,379 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Basecamp Lite — design tokens
+   Registered as Tailwind theme values, so bg-paper, text-ink,
+   font-display etc. are usable as utilities anywhere in the app.
+   ============================================================ */
+@theme {
+  --color-paper:        #F3EFE3;
+  --color-paper-raised: #FBF8EF;
+  --color-ink:          #23241F;
+  --color-ink-soft:     #5C5C50;
+  --color-pine:         #2F4B3C;
+  --color-pine-soft:    #4C6B58;
+  --color-rust:         #B5542D;
+  --color-mist:         #C9C4B2;
+  --color-gold:         #B8944A;
+  --color-line:         #DAD4C2;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body:    "Inter", sans-serif;
+  --font-mono:    "JetBrains Mono", monospace;
+
+  --radius-card: 14px;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(circle at 1px 1px, rgba(35, 36, 31, 0.05) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Visible keyboard focus everywhere, not just on hover */
+:focus-visible {
+  outline: 2px solid var(--color-pine);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-pine);
+  color: var(--color-paper-raised);
+}
+
+/* ============================================================
+   Layout shell (ProtectedLayout: sidebar + main)
+   ============================================================ */
+.app-shell {
+  display: grid;
+  grid-template-columns: 272px 1fr;
+  min-height: 100vh;
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+@media (max-width: 880px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+  .app-sidebar {
+    display: none;
+  }
+}
+
+.app-sidebar {
+  padding: 32px 20px 32px 28px;
+  border-right: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  padding: 32px 40px 60px;
+}
+
+@media (max-width: 600px) {
+  .app-main {
+    padding: 24px 18px 40px;
+  }
+}
+
+/* ============================================================
+   Sidebar trail (project navigation)
+   ============================================================ */
+.trail-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-ink-soft);
+  margin: 0 0 16px;
+}
+
+.trail {
+  position: relative;
+  padding-left: 26px;
+}
+
+.trail::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  bottom: 26px;
+  width: 1.5px;
+  background: repeating-linear-gradient(to bottom, var(--color-mist) 0 4px, transparent 4px 8px);
+}
+
+.camp {
+  position: relative;
+  margin-bottom: 26px;
+  cursor: pointer;
+}
+
+.camp:last-child {
+  margin-bottom: 0;
+}
+
+.camp-marker {
+  position: absolute;
+  left: -26px;
+  top: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-paper-raised);
+  border: 2px solid var(--color-pine);
+}
+
+.camp.done .camp-marker {
+  background: var(--color-pine);
+}
+
+.camp.attention .camp-marker {
+  border-color: var(--color-rust);
+}
+
+.camp-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13.5px;
+  margin: 0 0 4px;
+}
+
+.camp-meta {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.camp-bar {
+  width: 60px;
+  height: 3px;
+  background: var(--color-line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.camp-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--color-pine-soft);
+}
+
+.camp.attention .camp-bar > span {
+  background: var(--color-rust);
+}
+
+/* ============================================================
+   Cards, used by Dashboard / Projects / ProjectDetail / Reports
+   ============================================================ */
+.card {
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 22px;
+  border-top: 1px solid var(--color-line);
+}
+
+.card-row:first-child {
+  border-top: none;
+}
+
+.card-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  background: rgba(47, 75, 60, 0.04);
+}
+
+.card-group-head h3 {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.card-group-head .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--color-ink-soft);
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn-primary {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--color-ink);
+  color: var(--color-paper-raised);
+  border: none;
+  padding: 11px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--color-pine);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  padding: 10px 17px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-pine);
+  background: rgba(47, 75, 60, 0.04);
+}
+
+/* ============================================================
+   Checkboxes (task lists)
+   ============================================================ */
+.check {
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  border: 1.5px solid var(--color-mist);
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.check:hover {
+  border-color: var(--color-pine);
+}
+
+.check.checked {
+  background: var(--color-pine);
+  border-color: var(--color-pine);
+}
+
+.check.checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border-right: 2px solid var(--color-paper-raised);
+  border-bottom: 2px solid var(--color-paper-raised);
+  transform: rotate(40deg);
+}
+
+/* ============================================================
+   Tags / badges
+   ============================================================ */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.tag-urgent {
+  background: rgba(181, 84, 45, 0.14);
+  color: var(--color-rust);
+}
+
+.tag-review {
+  background: rgba(184, 148, 74, 0.16);
+  color: var(--color-gold);
+}
+
+/* ============================================================
+   Avatars
+   ============================================================ */
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-row {
+  display: flex;
+}
+
+.avatar-row .avatar {
+  margin-left: -8px;
+}
+
+.avatar-row .avatar:first-child {
+  margin-left: 0;
+}
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
