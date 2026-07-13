@@ -1,0 +1,137 @@
+// Prisma schema for MySQL. Every table carries orgId, which is the Clerk
+// organization ID from the verified session — that's how multi-tenancy is
+// enforced (every query filters WHERE orgId = ...).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
+  description String?  @db.Text
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members  TeamMember[]
+  projects Project[]
+
+  @@index([orgId])
+}
+
+model TeamMember {
+  id     String @id @default(cuid())
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  teamId String
+  userId String // Clerk user id
+  role   String @default("member") // lead | member
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  orgId       String
+  name        String
+  description String?   @db.Text
+  teamId      String?
+  team        Team?     @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  status      String    @default("planning") // planning | active | on_hold | completed | archived
+  priority    String    @default("medium")   // low | medium | high | urgent
+  startDate   DateTime?
+  dueDate     DateTime?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  members   ProjectMember[]
+  tasks     Task[]
+  documents Document[]
+
+  @@index([orgId])
+  @@index([teamId])
+}
+
+model ProjectMember {
+  id        String  @id @default(cuid())
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  userId    String // Clerk user id
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  orgId       String
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?   @db.Text
+  status      String    @default("todo") // todo | in_progress | in_review | done
+  priority    String    @default("medium")
+  assignee    String? // Clerk user id
+  dueDate     DateTime?
+  tags        Json?
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([orgId])
+  @@index([projectId])
+  @@index([assignee])
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  orgId      String
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title      String
+  fileUrl    String?
+  fileType   String   @default("text")
+  content    String?  @db.Text
+  uploadedBy String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([projectId])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  orgId      String
+  parentType String // task | project | document
+  parentId   String
+  body       String   @db.Text
+  author     String
+  createdAt  DateTime @default(now())
+
+  @@index([orgId])
+  @@index([parentType, parentId])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  orgId       String
+  recipient   String
+  type        String // task_assigned | comment_added | task_status_changed | project_added | document_uploaded
+  message     String   @db.Text
+  link        String?
+  read        Boolean  @default(false)
+  triggeredBy String?
+  createdAt   DateTime @default(now())
+
+  @@index([orgId])
+  @@index([recipient])
+}
