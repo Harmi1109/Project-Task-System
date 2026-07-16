@@ -20,22 +20,21 @@ import webhookRoutes from "./routes/webhooks.js";
 
 const app = express();
 
-// 1. GLOBAL PRE-PARSING MIDDLEWARE
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(morgan("dev"));
 
-// 2. WEBHOOK ROUTING (Requires Raw Body Processing)
-// Mounted BEFORE express.json() so Svix signature validation can read the clean buffer stream
 app.use("/api/webhooks", webhookRoutes);
 
-// 3. STANDARD JSON BODY PARSING 
 app.use(express.json());
 
-// 4. CLERK AUTHENTICATION CONTEXT PARSER
-// Decodes headers, evaluates JWT, and populates session data via getAuth(req) safely
+// CLERK
 app.use(clerkMiddleware());
 
-// 5. APPLICATION CORE ROUTE MAP
+// Root route — avoids "Not found - /" noise from health checks / browser hits
+app.get("/", (req, res) => {
+  res.json({ status: "Backend is running" });
+});
+
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
 app.use("/api/teams", teamRoutes);
@@ -46,20 +45,19 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/reports", reportRoutes);
 
-// 6. FALLBACK ERROR HANDLING MIDDLEWARE PIPELINES
+// FALLBACK ERROR HANDLING MIDDLEWARE PIPELINES
 app.use(notFound);
 app.use(errorHandler);
 
-// 🚀 VERIFY THE MYSQL PRISMA CONNECTION AT BOOT
 try {
   await prisma.$connect();
-  console.log("🚀 MySQL database cluster connected cleanly via Prisma Client.");
-  
+  console.log("MySQL database cluster connected cleanly via Prisma Client.");
+
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log(`🎯 Server engine initialized successfully on port ${PORT}`);
+    console.log(`Server engine initialized successfully on port ${PORT}`);
   });
 } catch (err) {
-  console.error("❌ Critical database connection abort:", err.message);
+  console.error("Critical database connection abort:", err.message);
   process.exit(1);
 }
